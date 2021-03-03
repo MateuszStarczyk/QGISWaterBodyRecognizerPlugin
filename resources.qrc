@@ -1,0 +1,5 @@
+<RCC>
+    <qresource prefix="/plugins/water_body_recognizer" >
+        <file>icon.png</file>
+    </qresource>
+</RCC>
