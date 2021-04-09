@@ -21,16 +21,15 @@
  *                                                                         *
  ***************************************************************************/
 """
-from qgis.PyQt.QtCore import QSettings, QTranslator, QCoreApplication, Qt
-from qgis.PyQt.QtGui import QIcon
-from qgis.PyQt.QtWidgets import QAction
+from PyQt5.QtCore import QSettings, QTranslator, QCoreApplication, Qt
+from PyQt5.QtGui import QIcon
+from PyQt5.QtWidgets import QAction
 # Initialize Qt resources from file resources.py
 from .resources import *
-
 # Import the code for the DockWidget
 from .water_body_recognizer_dockwidget import WaterBodyRecognizerDockWidget
 import os.path
-
+import pydevd_pycharm
 
 class WaterBodyRecognizer:
     """QGIS Plugin Implementation."""
@@ -43,6 +42,7 @@ class WaterBodyRecognizer:
             application at run time.
         :type iface: QgsInterface
         """
+        pydevd_pycharm.settrace('localhost', port=5678, stdoutToServer=True, stderrToServer=True)
         # Save reference to the QGIS interface
         self.iface = iface
 
@@ -167,7 +167,7 @@ class WaterBodyRecognizer:
     def initGui(self):
         """Create the menu entries and toolbar icons inside the QGIS GUI."""
 
-        icon_path = ':/plugins/water_body_recognizer/icon.png'
+        icon_path = ':/plugins/QGISWaterBodyRecognizerPlugin/icon.png'
         self.add_action(
             icon_path,
             text=self.tr(u'Water Body Recognizer'),
@@ -224,9 +224,11 @@ class WaterBodyRecognizer:
                 self.dockwidget = WaterBodyRecognizerDockWidget()
 
             # connect to provide cleanup on closing of dockwidget
-            self.dockwidget.closingPlugin.connect(self.onClosePlugin)
+            # self.dockwidget.closingPlugin.connect(self.onClosePlugin)
 
             # show the dockwidget
             # TODO: fix to allow choice of dock location
             self.iface.addDockWidget(Qt.LeftDockWidgetArea, self.dockwidget)
+            self.dockwidget.show()
+        if self.dockwidget.isHidden():
             self.dockwidget.show()

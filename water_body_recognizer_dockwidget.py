@@ -24,27 +24,30 @@
 
 import os
 
-from qgis.PyQt import QtGui, QtWidgets, uic
-from qgis.PyQt.QtCore import pyqtSignal
+from PyQt5.QtWidgets import QDockWidget
+from PyQt5.uic import loadUiType
+from PyQt5.QtCore import pyqtSignal
 
-FORM_CLASS, _ = uic.loadUiType(os.path.join(
-    os.path.dirname(__file__), 'water_body_recognizer_dockwidget_base.ui'))
+from qgis.core import QgsMapLayerProxyModel
+
+FORM_CLASS, _ = loadUiType(os.path.join(os.path.dirname(__file__), 'water_body_recognizer_dockwidget.ui'))
 
 
-class WaterBodyRecognizerDockWidget(QtWidgets.QDockWidget, FORM_CLASS):
-
+class WaterBodyRecognizerDockWidget(QDockWidget, FORM_CLASS):
+    """ The main widget class for interaction with UI
+    """
     closingPlugin = pyqtSignal()
 
     def __init__(self, parent=None):
-        """Constructor."""
-        super(WaterBodyRecognizerDockWidget, self).__init__(parent)
-        # Set up the user interface from Designer.
-        # After setupUI you can access any designer object by doing
-        # self.<objectname>, and you can use autoconnect slots - see
-        # http://doc.qt.io/qt-5/designer-using-a-ui-file.html
-        # #widgets-and-dialogs-with-auto-connect
+        """ Constructor
+        """
+        super().__init__(parent)
         self.setupUi(self)
+        self.mMapLayerComboBox.setFilters(QgsMapLayerProxyModel.RasterLayer)
+        self.mPolygonLayerComboBox.setFilters(QgsMapLayerProxyModel.PolygonLayer)
 
     def closeEvent(self, event):
+        """ When plugin is closed
+        """
         self.closingPlugin.emit()
         event.accept()
