@@ -45,6 +45,11 @@ class WaterBodyRecognizerDockWidget(QDockWidget, FORM_CLASS):
         self.setupUi(self)
         self.mMapLayerComboBox.setFilters(QgsMapLayerProxyModel.RasterLayer)
         self.mPolygonLayerComboBox.setFilters(QgsMapLayerProxyModel.PolygonLayer)
+        self.btnLearn.clicked.connect(self.btnLearnClicked)
+        self.btnClassify.clicked.connect(self.btnClassifyClicked)
+
+    def btnClassifyClicked(self):
+        print("classify")
 
     def closeEvent(self, event):
         """ When plugin is closed
