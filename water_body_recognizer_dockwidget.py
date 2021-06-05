@@ -27,6 +27,7 @@ import os
 from PyQt5.QtWidgets import QDockWidget
 from PyQt5.uic import loadUiType
 from PyQt5.QtCore import pyqtSignal
+from .predict import predict
 
 from qgis.core import QgsMapLayerProxyModel
 
@@ -38,21 +39,57 @@ class WaterBodyRecognizerDockWidget(QDockWidget, FORM_CLASS):
     """
     closingPlugin = pyqtSignal()
 
-    def __init__(self, parent=None):
+    def __init__(self, iface, parent=None):
         """ Constructor
         """
         super().__init__(parent)
+        self.iface = iface
+        self.index = 'ndwi'
         self.setupUi(self)
         self.mMapLayerComboBox.setFilters(QgsMapLayerProxyModel.RasterLayer)
-        self.mPolygonLayerComboBox.setFilters(QgsMapLayerProxyModel.PolygonLayer)
-        self.btnLearn.clicked.connect(self.btnLearnClicked)
+        self.mMapLayerComboBox.layerChanged.connect(self.layerChanged)
+        if self.mMapLayerComboBox.layer(0) is not None:
+            self.setCombosLayer(self.mMapLayerComboBox.layer(0))
+        self.rbNDWI.clicked.connect(self.indexChanged)
+        self.rbANDWI.clicked.connect(self.indexChanged)
+        self.rbNDWI.setChecked(True)
         self.btnClassify.clicked.connect(self.btnClassifyClicked)
 
     def btnClassifyClicked(self):
-        print("classify")
+        try:
+            predict(self, inRaster=self.mMapLayerComboBox, index=self.index, bands=self.getBands())
+        except Exception as e:
+            print("Error")
 
     def closeEvent(self, event):
         """ When plugin is closed
         """
         self.closingPlugin.emit()
         event.accept()
+
+    def setCombosLayer(self, layer):
+        self.mRedRasterBand.setLayer(layer)
+        self.mGreenRasterBand.setLayer(layer)
+        self.mBlueRasterBand.setLayer(layer)
+        self.mNIRRasterBand.setLayer(layer)
+        self.mSWIR1RasterBand.setLayer(layer)
+        self.mSWIR2RasterBand.setLayer(layer)
+
+    def layerChanged(self, layer):
+        self.setCombosLayer(layer)
+
+    def indexChanged(self):
+        if self.rbNDWI.isChecked():
+            self.index = 'ndwi'
+        else:
+            self.index = 'andwi'
+
+    def getBands(self):
+        return [
+            self.mRedRasterBand.currentBand() - 1,
+            self.mGreenRasterBand.currentBand() - 1,
+            self.mBlueRasterBand.currentBand() - 1,
+            self.mNIRRasterBand.currentBand() - 1,
+            self.mSWIR1RasterBand.currentBand() - 1,
+            self.mSWIR2RasterBand.currentBand() - 1
+        ]
