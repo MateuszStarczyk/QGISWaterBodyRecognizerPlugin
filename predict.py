@@ -81,7 +81,12 @@ def predict_image(self, inRaster, outRaster, model, bands, feedback="gui", index
         GeoTransform = raster.GetGeoTransform()
         Projection = raster.GetProjection()
 
-        raw_data = tifffile.imread(inRaster).transpose([1, 2, 0])
+        raw_data = tifffile.imread(inRaster)
+        if raw_data.shape[0] < raw_data.shape[1] and raw_data.shape[0] < raw_data.shape[2]:
+            raw_data = raw_data.transpose([1, 2, 0])
+        elif raw_data.shape[1] < raw_data.shape[0] and raw_data.shape[1] < raw_data.shape[2]:
+            raw_data = raw_data.transpose([0, 2, 1])
+
         image_data = scale_image_percentile(raw_data)
 
         x, new_size, splits, img_width, img_height = get_patches(image=image_data, network_size=114, index=index,
@@ -114,7 +119,7 @@ def predict_image(self, inRaster, outRaster, model, bands, feedback="gui", index
             os.makedirs(os.path.dirname(outRaster))
 
         tifffile.imwrite(outRaster, result)
-        dst_ds = gdal.Open(inRaster, gdal.GA_Update)
+        dst_ds = gdal.Open(outRaster, gdal.GA_Update)
         dst_ds.SetGeoTransform(GeoTransform)
         dst_ds.SetProjection(Projection)
 
