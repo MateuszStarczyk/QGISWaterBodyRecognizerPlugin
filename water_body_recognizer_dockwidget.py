@@ -24,27 +24,72 @@
 
 import os
 
-from qgis.PyQt import QtGui, QtWidgets, uic
-from qgis.PyQt.QtCore import pyqtSignal
+from PyQt5.QtWidgets import QDockWidget
+from PyQt5.uic import loadUiType
+from PyQt5.QtCore import pyqtSignal
+from .predict import predict
 
-FORM_CLASS, _ = uic.loadUiType(os.path.join(
-    os.path.dirname(__file__), 'water_body_recognizer_dockwidget_base.ui'))
+from qgis.core import QgsMapLayerProxyModel
+
+FORM_CLASS, _ = loadUiType(os.path.join(os.path.dirname(__file__), 'water_body_recognizer_dockwidget.ui'))
 
 
-class WaterBodyRecognizerDockWidget(QtWidgets.QDockWidget, FORM_CLASS):
-
+class WaterBodyRecognizerDockWidget(QDockWidget, FORM_CLASS):
+    """ The main widget class for interaction with UI
+    """
     closingPlugin = pyqtSignal()
 
-    def __init__(self, parent=None):
-        """Constructor."""
-        super(WaterBodyRecognizerDockWidget, self).__init__(parent)
-        # Set up the user interface from Designer.
-        # After setupUI you can access any designer object by doing
-        # self.<objectname>, and you can use autoconnect slots - see
-        # http://doc.qt.io/qt-5/designer-using-a-ui-file.html
-        # #widgets-and-dialogs-with-auto-connect
+    def __init__(self, iface, parent=None):
+        """ Constructor
+        """
+        super().__init__(parent)
+        self.iface = iface
+        self.index = 'ndwi'
         self.setupUi(self)
+        self.mMapLayerComboBox.setFilters(QgsMapLayerProxyModel.RasterLayer)
+        self.mMapLayerComboBox.layerChanged.connect(self.layerChanged)
+        if self.mMapLayerComboBox.layer(0) is not None:
+            self.setCombosLayer(self.mMapLayerComboBox.layer(0))
+        self.rbNDWI.clicked.connect(self.indexChanged)
+        self.rbANDWI.clicked.connect(self.indexChanged)
+        self.rbNDWI.setChecked(True)
+        self.btnClassify.clicked.connect(self.btnClassifyClicked)
+
+    def btnClassifyClicked(self):
+        try:
+            predict(self, inRaster=self.mMapLayerComboBox, index=self.index, bands=self.getBands())
+        except Exception as e:
+            print("Error")
 
     def closeEvent(self, event):
+        """ When plugin is closed
+        """
         self.closingPlugin.emit()
         event.accept()
+
+    def setCombosLayer(self, layer):
+        self.mRedRasterBand.setLayer(layer)
+        self.mGreenRasterBand.setLayer(layer)
+        self.mBlueRasterBand.setLayer(layer)
+        self.mNIRRasterBand.setLayer(layer)
+        self.mSWIR1RasterBand.setLayer(layer)
+        self.mSWIR2RasterBand.setLayer(layer)
+
+    def layerChanged(self, layer):
+        self.setCombosLayer(layer)
+
+    def indexChanged(self):
+        if self.rbNDWI.isChecked():
+            self.index = 'ndwi'
+        else:
+            self.index = 'andwi'
+
+    def getBands(self):
+        return [
+            self.mRedRasterBand.currentBand() - 1,
+            self.mGreenRasterBand.currentBand() - 1,
+            self.mBlueRasterBand.currentBand() - 1,
+            self.mNIRRasterBand.currentBand() - 1,
+            self.mSWIR1RasterBand.currentBand() - 1,
+            self.mSWIR2RasterBand.currentBand() - 1
+        ]

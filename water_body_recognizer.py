@@ -21,15 +21,15 @@
  *                                                                         *
  ***************************************************************************/
 """
-from qgis.PyQt.QtCore import QSettings, QTranslator, QCoreApplication, Qt
-from qgis.PyQt.QtGui import QIcon
-from qgis.PyQt.QtWidgets import QAction
+from PyQt5.QtCore import QSettings, QTranslator, QCoreApplication, Qt
+from PyQt5.QtGui import QIcon
+from PyQt5.QtWidgets import QAction
 # Initialize Qt resources from file resources.py
 from .resources import *
-
 # Import the code for the DockWidget
 from .water_body_recognizer_dockwidget import WaterBodyRecognizerDockWidget
 import os.path
+import pydevd_pycharm
 
 
 class WaterBodyRecognizer:
@@ -43,6 +43,7 @@ class WaterBodyRecognizer:
             application at run time.
         :type iface: QgsInterface
         """
+        pydevd_pycharm.settrace('localhost', port=5678, stdoutToServer=True, stderrToServer=True, suspend=False)
         # Save reference to the QGIS interface
         self.iface = iface
 
@@ -64,15 +65,13 @@ class WaterBodyRecognizer:
         # Declare instance attributes
         self.actions = []
         self.menu = self.tr(u'&Water Body Recognizer')
-        # TODO: We are going to let the user set this up in a future iteration
         self.toolbar = self.iface.addToolBar(u'WaterBodyRecognizer')
         self.toolbar.setObjectName(u'WaterBodyRecognizer')
 
-        #print "** INITIALIZING WaterBodyRecognizer"
+        # print "** INITIALIZING WaterBodyRecognizer"
 
         self.pluginIsActive = False
         self.dockwidget = None
-
 
     # noinspection PyMethodMayBeStatic
     def tr(self, message):
@@ -89,18 +88,17 @@ class WaterBodyRecognizer:
         # noinspection PyTypeChecker,PyArgumentList,PyCallByClass
         return QCoreApplication.translate('WaterBodyRecognizer', message)
 
-
     def add_action(
-        self,
-        icon_path,
-        text,
-        callback,
-        enabled_flag=True,
-        add_to_menu=True,
-        add_to_toolbar=True,
-        status_tip=None,
-        whats_this=None,
-        parent=None):
+            self,
+            icon_path,
+            text,
+            callback,
+            enabled_flag=True,
+            add_to_menu=True,
+            add_to_toolbar=True,
+            status_tip=None,
+            whats_this=None,
+            parent=None):
         """Add a toolbar icon to the toolbar.
 
         :param icon_path: Path to the icon for this action. Can be a resource
@@ -163,23 +161,22 @@ class WaterBodyRecognizer:
 
         return action
 
-
     def initGui(self):
         """Create the menu entries and toolbar icons inside the QGIS GUI."""
 
-        icon_path = ':/plugins/water_body_recognizer/icon.png'
+        icon_path = ':/plugins/QGISWaterBodyRecognizerPlugin/icon.png'
         self.add_action(
             icon_path,
             text=self.tr(u'Water Body Recognizer'),
             callback=self.run,
             parent=self.iface.mainWindow())
 
-    #--------------------------------------------------------------------------
+    # --------------------------------------------------------------------------
 
     def onClosePlugin(self):
         """Cleanup necessary items here when plugin dockwidget is closed"""
 
-        #print "** CLOSING WaterBodyRecognizer"
+        # print "** CLOSING WaterBodyRecognizer"
 
         # disconnects
         self.dockwidget.closingPlugin.disconnect(self.onClosePlugin)
@@ -192,11 +189,10 @@ class WaterBodyRecognizer:
 
         self.pluginIsActive = False
 
-
     def unload(self):
         """Removes the plugin menu item and icon from QGIS GUI."""
 
-        #print "** UNLOAD WaterBodyRecognizer"
+        # print "** UNLOAD WaterBodyRecognizer"
 
         for action in self.actions:
             self.iface.removePluginMenu(
@@ -206,7 +202,7 @@ class WaterBodyRecognizer:
         # remove the toolbar
         del self.toolbar
 
-    #--------------------------------------------------------------------------
+    # --------------------------------------------------------------------------
 
     def run(self):
         """Run method that loads and starts the plugin"""
@@ -214,19 +210,20 @@ class WaterBodyRecognizer:
         if not self.pluginIsActive:
             self.pluginIsActive = True
 
-            #print "** STARTING WaterBodyRecognizer"
+            # print "** STARTING WaterBodyRecognizer"
 
             # dockwidget may not exist if:
             #    first run of plugin
             #    removed on close (see self.onClosePlugin method)
             if self.dockwidget == None:
                 # Create the dockwidget (after translation) and keep reference
-                self.dockwidget = WaterBodyRecognizerDockWidget()
+                self.dockwidget = WaterBodyRecognizerDockWidget(iface=self.iface)
 
             # connect to provide cleanup on closing of dockwidget
-            self.dockwidget.closingPlugin.connect(self.onClosePlugin)
+            # self.dockwidget.closingPlugin.connect(self.onClosePlugin)
 
             # show the dockwidget
-            # TODO: fix to allow choice of dock location
             self.iface.addDockWidget(Qt.LeftDockWidgetArea, self.dockwidget)
+            self.dockwidget.show()
+        if self.dockwidget.isHidden():
             self.dockwidget.show()

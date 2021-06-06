@@ -1,5 +1,7 @@
 <RCC>
-    <qresource prefix="/plugins/water_body_recognizer" >
-        <file>icon.png</file>
-    </qresource>
+  <qresource prefix="/plugins/QGISWaterBodyRecognizerPlugin">
+    <file>icon.png</file>
+    <file>img/raster.svg</file>
+    <file>img/vector.svg</file>
+  </qresource>
 </RCC>
