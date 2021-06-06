@@ -29,7 +29,6 @@ from .resources import *
 # Import the code for the DockWidget
 from .water_body_recognizer_dockwidget import WaterBodyRecognizerDockWidget
 import os.path
-import pydevd_pycharm
 
 
 class WaterBodyRecognizer:
@@ -43,7 +42,6 @@ class WaterBodyRecognizer:
             application at run time.
         :type iface: QgsInterface
         """
-        pydevd_pycharm.settrace('localhost', port=5678, stdoutToServer=True, stderrToServer=True, suspend=False)
         # Save reference to the QGIS interface
         self.iface = iface
 
