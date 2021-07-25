@@ -66,8 +66,6 @@ class WaterBodyRecognizer:
         self.toolbar = self.iface.addToolBar(u'WaterBodyRecognizer')
         self.toolbar.setObjectName(u'WaterBodyRecognizer')
 
-        # print "** INITIALIZING WaterBodyRecognizer"
-
         self.pluginIsActive = False
         self.dockwidget = None
 
@@ -174,23 +172,13 @@ class WaterBodyRecognizer:
     def onClosePlugin(self):
         """Cleanup necessary items here when plugin dockwidget is closed"""
 
-        # print "** CLOSING WaterBodyRecognizer"
-
         # disconnects
         self.dockwidget.closingPlugin.disconnect(self.onClosePlugin)
-
-        # remove this statement if dockwidget is to remain
-        # for reuse if plugin is reopened
-        # Commented next statement since it causes QGIS crashe
-        # when closing the docked window:
-        # self.dockwidget = None
 
         self.pluginIsActive = False
 
     def unload(self):
         """Removes the plugin menu item and icon from QGIS GUI."""
-
-        # print "** UNLOAD WaterBodyRecognizer"
 
         for action in self.actions:
             self.iface.removePluginMenu(
@@ -208,17 +196,9 @@ class WaterBodyRecognizer:
         if not self.pluginIsActive:
             self.pluginIsActive = True
 
-            # print "** STARTING WaterBodyRecognizer"
-
-            # dockwidget may not exist if:
-            #    first run of plugin
-            #    removed on close (see self.onClosePlugin method)
             if self.dockwidget == None:
                 # Create the dockwidget (after translation) and keep reference
                 self.dockwidget = WaterBodyRecognizerDockWidget(iface=self.iface)
-
-            # connect to provide cleanup on closing of dockwidget
-            # self.dockwidget.closingPlugin.connect(self.onClosePlugin)
 
             # show the dockwidget
             self.iface.addDockWidget(Qt.LeftDockWidgetArea, self.dockwidget)
