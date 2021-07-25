@@ -15,6 +15,6 @@
 ![Water Body Recognizer Plugin](img/img1.png "Water Body Recognizer Plugin")
 3. Detect water.<br />
 ![Detect water result](img/img3.png "Detect water result")
-###Notes: 
+### Notes: 
 1. Before segmentation can be performed, the learned models for both the [NDWI](https://politechnikawroclawska-my.sharepoint.com/:u:/g/personal/238025_student_pwr_edu_pl/ESV04L1oxCtDonqiJde9KxMBG7FrhPhOsO0V9u-aDtw0HQ) and [ANDWI](https://politechnikawroclawska-my.sharepoint.com/:u:/g/personal/238025_student_pwr_edu_pl/EQH8bYWPgaFEvjp2fJ34miwBRVyA8frQEyXITv6VqSKmvg?e=GJPOB2) indexes must be downloaded to the plugin folder
 2. Sometimes before detecting water opened QGIS Python Console is required.
